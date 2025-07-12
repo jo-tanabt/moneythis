@@ -6,15 +6,15 @@ import NaturalLanguageInput from '../components/nlp/NaturalLanguageInput'
 
 const AddExpensePage = () => {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('manual')
+  const [activeTab, setActiveTab] = useState('nlp')
 
   const handleExpenseCreated = () => {
     navigate('/expenses')
   }
 
   const tabs = [
-    { id: 'manual', label: 'Manual Entry', icon: '✋' },
     { id: 'nlp', label: 'Natural Language', icon: '🤖' },
+    { id: 'manual', label: 'Manual Entry', icon: '✋' },
   ]
 
   return (

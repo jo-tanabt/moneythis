@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './hooks/useAuth'
+import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
 import Layout from './components/common/Layout'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
@@ -29,7 +29,7 @@ function AppContent() {
       {/* Protected routes */}
       {user ? (
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/dashboard" />} />
+          <Route index element={<Navigate to="/add-expense" />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="expenses" element={<ExpensesPage />} />
           <Route path="add-expense" element={<AddExpensePage />} />

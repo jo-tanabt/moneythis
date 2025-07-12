@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import NotionCard from '../components/common/NotionCard'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../hooks/useAuth.jsx'
 
 const SettingsPage = () => {
   const { user } = useAuth()

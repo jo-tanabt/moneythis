@@ -62,9 +62,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster queries
-userSchema.index({ email: 1 });
-userSchema.index({ googleId: 1 });
+// Indexes are automatically created by unique: true fields above
 
 // Don't return sensitive data
 userSchema.methods.toJSON = function() {

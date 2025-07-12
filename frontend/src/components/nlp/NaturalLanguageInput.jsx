@@ -7,18 +7,44 @@ import LoadingSpinner from '../common/LoadingSpinner'
 const NaturalLanguageInput = ({ onSuccess }) => {
   const [text, setText] = useState('')
   const [parsedData, setParsedData] = useState(null)
+  const [showPreview, setShowPreview] = useState(false)
 
   const parseMutation = useMutation(
-    (text) => expenseAPI.parseText(text),
+    (text) => {
+      // First, just parse without creating
+      return fetch(`${import.meta.env.VITE_API_URL}/expenses/parse-preview`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ text })
+      }).then(res => res.json())
+    },
     {
-      onSuccess: (response) => {
-        setParsedData(response.data)
-        toast.success('Expense parsed and created!')
+      onSuccess: (data) => {
+        setParsedData(data)
+        setShowPreview(true)
+        toast.success('Expense parsed! Please review and confirm.')
+      },
+      onError: (error) => {
+        toast.error('Failed to parse expense')
+      }
+    }
+  )
+
+  const createMutation = useMutation(
+    (expenseData) => expenseAPI.createExpense(expenseData),
+    {
+      onSuccess: () => {
+        toast.success('Expense created successfully!')
         setText('')
+        setParsedData(null)
+        setShowPreview(false)
         onSuccess()
       },
       onError: (error) => {
-        toast.error(error.response?.data?.message || 'Failed to parse expense')
+        toast.error(error.response?.data?.message || 'Failed to create expense')
       }
     }
   )
@@ -32,6 +58,25 @@ const NaturalLanguageInput = ({ onSuccess }) => {
     parseMutation.mutate(text)
   }
 
+  const handleConfirm = () => {
+    createMutation.mutate({
+      ...parsedData,
+      source: 'nlp'
+    })
+  }
+
+  const handleEdit = (field, value) => {
+    setParsedData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleCancel = () => {
+    setShowPreview(false)
+    setParsedData(null)
+  }
+
   const examples = [
     "Spent $12.50 on coffee at Starbucks",
     "Lunch with friends $45 yesterday",
@@ -39,6 +84,99 @@ const NaturalLanguageInput = ({ onSuccess }) => {
     "Groceries at Walmart $67.80",
     "Uber ride $15.30"
   ]
+
+  if (showPreview && parsedData) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold text-notion-text mb-2">
+            Review Parsed Expense
+          </h3>
+          <p className="text-notion-muted text-sm">
+            Please review the details and make any necessary changes before confirming
+          </p>
+        </div>
+
+        <div className="bg-notion-secondary p-4 rounded-lg">
+          <p className="text-sm text-notion-muted mb-2">Original text:</p>
+          <p className="italic">"{text}"</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-notion-text mb-1">Amount</label>
+              <input
+                type="number"
+                value={parsedData.amount || ''}
+                onChange={(e) => handleEdit('amount', parseFloat(e.target.value))}
+                className="notion-input"
+                step="0.01"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-notion-text mb-1">Category</label>
+              <input
+                type="text"
+                value={parsedData.category || ''}
+                onChange={(e) => handleEdit('category', e.target.value)}
+                className="notion-input"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-notion-text mb-1">Description</label>
+            <input
+              type="text"
+              value={parsedData.description || ''}
+              onChange={(e) => handleEdit('description', e.target.value)}
+              className="notion-input"
+            />
+          </div>
+
+          {parsedData.merchant && (
+            <div>
+              <label className="block text-sm font-medium text-notion-text mb-1">Merchant</label>
+              <input
+                type="text"
+                value={parsedData.merchant || ''}
+                onChange={(e) => handleEdit('merchant', e.target.value)}
+                className="notion-input"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-notion-text mb-1">Date</label>
+            <input
+              type="date"
+              value={parsedData.date ? new Date(parsedData.date).toISOString().split('T')[0] : ''}
+              onChange={(e) => handleEdit('date', e.target.value)}
+              className="notion-input"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handleConfirm}
+            disabled={createMutation.isLoading}
+            className="notion-button-primary disabled:opacity-50 flex items-center space-x-2"
+          >
+            {createMutation.isLoading && <LoadingSpinner size="small" />}
+            <span>✅ Confirm & Create Expense</span>
+          </button>
+          <button
+            onClick={handleCancel}
+            className="notion-button-secondary"
+          >
+            ❌ Cancel
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -69,7 +207,7 @@ const NaturalLanguageInput = ({ onSuccess }) => {
           className="notion-button-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
         >
           {parseMutation.isLoading && <LoadingSpinner size="small" />}
-          <span>🤖 Parse & Create Expense</span>
+          <span>🤖 Parse Expense</span>
         </button>
       </form>
 

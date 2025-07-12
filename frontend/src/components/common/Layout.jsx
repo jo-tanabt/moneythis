@@ -4,14 +4,12 @@ import Navigation from './Navigation'
 
 const Layout = () => {
   return (
-    <div className="min-h-screen bg-notion-bg">
+    <div className="min-h-screen bg-notion-bg pb-20">
       <Header />
-      <div className="flex">
-        <Navigation />
-        <main className="flex-1 p-6 lg:p-8 ml-64">
-          <Outlet />
-        </main>
-      </div>
+      <main className="p-4 md:p-6 lg:p-8">
+        <Outlet />
+      </main>
+      <Navigation />
     </div>
   )
 }
