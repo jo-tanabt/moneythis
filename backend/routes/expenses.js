@@ -13,7 +13,15 @@ router.use(authMiddleware);
 // Get all expenses for user
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 50, category, startDate, endDate } = req.query;
+    const { 
+      page = 1, 
+      limit = 50, 
+      category, 
+      startDate, 
+      endDate, 
+      sortBy = 'date', 
+      sortOrder = 'desc' 
+    } = req.query;
     
     const filter = { userId: req.user._id };
     
@@ -24,8 +32,12 @@ router.get('/', async (req, res) => {
       if (endDate) filter.date.$lte = new Date(endDate);
     }
 
+    // Build sort object
+    const sortObj = {};
+    sortObj[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
     const expenses = await Expense.find(filter)
-      .sort({ date: -1 })
+      .sort(sortObj)
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
@@ -36,7 +48,9 @@ router.get('/', async (req, res) => {
       expenses,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
-      total
+      total,
+      sortBy,
+      sortOrder
     });
   } catch (error) {
     console.error('Get expenses error:', error);

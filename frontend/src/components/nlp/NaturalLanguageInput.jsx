@@ -1,13 +1,19 @@
 import { useState } from 'react'
-import { useMutation } from 'react-query'
+import { useMutation, useQuery } from 'react-query'
 import toast from 'react-hot-toast'
-import { expenseAPI } from '../../services/api'
+import { expenseAPI, categoryAPI } from '../../services/api'
 import LoadingSpinner from '../common/LoadingSpinner'
 
 const NaturalLanguageInput = ({ onSuccess }) => {
   const [text, setText] = useState('')
   const [parsedData, setParsedData] = useState(null)
   const [showPreview, setShowPreview] = useState(false)
+
+  const { data: categories } = useQuery(
+    'categories',
+    () => categoryAPI.getCategories(),
+    { select: data => data.data }
+  )
 
   const parseMutation = useMutation(
     (text) => {
@@ -116,12 +122,18 @@ const NaturalLanguageInput = ({ onSuccess }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-notion-text mb-1">Category</label>
-              <input
-                type="text"
+              <select
                 value={parsedData.category || ''}
                 onChange={(e) => handleEdit('category', e.target.value)}
-                className="notion-input"
-              />
+                className="notion-select"
+              >
+                <option value="">Select a category</option>
+                {categories?.map((category) => (
+                  <option key={category._id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

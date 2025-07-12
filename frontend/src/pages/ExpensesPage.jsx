@@ -12,6 +12,8 @@ const ExpensesPage = () => {
     category: '',
     startDate: '',
     endDate: '',
+    sortBy: 'date',
+    sortOrder: 'desc',
     page: 1
   })
 

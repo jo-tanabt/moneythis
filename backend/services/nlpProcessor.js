@@ -21,14 +21,7 @@ class NLPProcessor {
 
   async parseExpenseText(text) {
     try {
-      // First try quick regex extraction
-      const quickResult = this.quickExtract(text);
-      
-      if (quickResult.confidence > 0.7) {
-        return quickResult;
-      }
-
-      // Fallback to LLM for complex cases
+      // Always use OpenAI for better accuracy and descriptions
       return await llmService.parseExpenseText(text);
     } catch (error) {
       console.error('NLP processing error:', error);

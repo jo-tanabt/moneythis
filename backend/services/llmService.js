@@ -76,7 +76,7 @@ Parse the following natural language text about an expense and extract the infor
 
 {
   "amount": number,
-  "description": string,
+  "description": string (detailed description of what was purchased),
   "merchant": string (if mentioned),
   "date": string (if mentioned, otherwise current date),
   "category": string,
@@ -85,11 +85,19 @@ Parse the following natural language text about an expense and extract the infor
 
 Text: "${text}"
 
-Categories: Food & Drink, Transportation, Shopping, Entertainment, Bills & Utilities, Healthcare, Travel, Other
+Categories (use exact names): Food & Drink, Transportation, Shopping, Entertainment, Bills & Utilities, Healthcare, Travel, Other
+
+IMPORTANT RULES:
+- Create a meaningful, specific description (not just generic words like "expense" or "purchase")
+- Use title case for descriptions (e.g., "Coffee At Starbucks", "Lunch With Friends", "Gas Fill-Up")
+- Extract specific items when mentioned (e.g., "coffee", "lunch", "groceries", "uber ride")
+- Be descriptive but concise (2-4 words typically)
 
 Examples:
-"Spent $12.50 on coffee at Starbucks" -> {"amount": 12.50, "description": "Coffee", "merchant": "Starbucks", "category": "Food & Drink", "confidence": 0.9}
-"Gas $45 yesterday" -> {"amount": 45, "description": "Gas", "category": "Transportation", "confidence": 0.8}
+"Spent $12.50 on coffee at Starbucks" -> {"amount": 12.50, "description": "Coffee At Starbucks", "merchant": "Starbucks", "category": "Food & Drink", "confidence": 0.9}
+"Gas station $38.20" -> {"amount": 38.20, "description": "Gas Fill-Up", "category": "Transportation", "confidence": 0.8}
+"Lunch with friends $45 yesterday" -> {"amount": 45, "description": "Lunch With Friends", "category": "Food & Drink", "confidence": 0.9}
+"Groceries at Walmart $67.80" -> {"amount": 67.80, "description": "Groceries At Walmart", "merchant": "Walmart", "category": "Shopping", "confidence": 0.9}
 
 Respond with only the JSON:`;
 
