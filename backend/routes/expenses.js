@@ -98,14 +98,20 @@ router.post('/parse-preview', [
   body('text').notEmpty().withMessage('Text is required')
 ], async (req, res) => {
   try {
+    console.log('Parse preview request received:', req.body);
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
+    console.log('Calling NLP service with text:', req.body.text);
     const parsedData = await nlpService.parseExpenseText(req.body.text);
+    console.log('NLP service returned:', parsedData);
     
     if (!parsedData.amount) {
+      console.log('No amount found in parsed data');
       return res.status(400).json({ message: 'Could not extract amount from text' });
     }
 
@@ -113,7 +119,8 @@ router.post('/parse-preview', [
     res.json(parsedData);
   } catch (error) {
     console.error('Parse preview error:', error);
-    res.status(500).json({ message: 'Failed to parse expense text' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ message: 'Failed to parse expense text', error: error.message });
   }
 });
 

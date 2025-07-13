@@ -2,6 +2,12 @@ const { OpenAI } = require('openai');
 
 class LLMService {
   constructor() {
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY not found in environment variables');
+    } else {
+      console.log('OpenAI API key loaded:', process.env.OPENAI_API_KEY.substring(0, 10) + '...');
+    }
+    
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
@@ -110,8 +116,10 @@ Respond with only the JSON:`;
           }
         ],
         temperature: 0.1,
-        max_tokens: 150
+        max_tokens: 200
       });
+
+      console.log('OpenAI response:', response.choices[0].message.content);
 
       const result = JSON.parse(response.choices[0].message.content);
       
@@ -131,6 +139,22 @@ Respond with only the JSON:`;
 
     } catch (error) {
       console.error('NLP parsing error:', error);
+      console.error('Error details:', error.message);
+      
+      // Fallback response if OpenAI fails
+      const amountMatch = text.match(/\$?(\d+(?:\.\d{2})?)/);
+      if (amountMatch) {
+        return {
+          amount: parseFloat(amountMatch[1]),
+          description: 'Parsed Expense',
+          merchant: null,
+          date: new Date(),
+          category: 'Other',
+          confidence: 0.5,
+          source: 'nlp'
+        };
+      }
+      
       throw new Error('Failed to parse expense text');
     }
   }
